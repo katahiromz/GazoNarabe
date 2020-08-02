@@ -8,7 +8,7 @@
 
 AppId={{AF8494D2-506F-4D01-B8FE-BF9BFB97F622}
 AppName=GazoNarabe
-AppVerName=GazoNarabe 0.7
+AppVerName=GazoNarabe 0.8
 AppPublisher=Katayama Hirofumi MZ
 AppPublisherURL=http://katahiromz.web.fc2.com/
 AppSupportURL=http://katahiromz.web.fc2.com/
@@ -18,7 +18,7 @@ DefaultGroupName=GazoNarabe
 AllowNoIcons=yes
 LicenseFile=LICENSE.txt
 OutputDir=.
-OutputBaseFilename=GazoNarabe-0.7-installer
+OutputBaseFilename=GazoNarabe-0.8-installer
 SetupIconFile=GN.ico
 Compression=lzma
 SolidCompression=yes
@@ -27,9 +27,9 @@ VersionInfoCompany=片山博文MZ
 VersionInfoCopyright=Copyright (C) 2020 Katayama Hirofumi MZ.
 VersionInfoDescription=Image Arrangement Application
 VersionInfoProductName=GazoNarabe
-VersionInfoProductTextVersion=0.7
-VersionInfoProductVersion=0.7
-VersionInfoVersion=0.7
+VersionInfoProductTextVersion=0.8
+VersionInfoProductVersion=0.8
+VersionInfoVersion=0.8
 
 [Languages]
 Name: "english"; MessagesFile:  "compiler:Default.isl"

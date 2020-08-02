@@ -143,7 +143,7 @@ class UISample(ttk.Frame):
         self.datetime_type_default = "画像作成日時"
     def __init__(self, root):
         super().__init__(root, width='620', height='460')
-        self.image_ext_list = [".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff", ".bmp", ".dib", ".emf", ".wmf"]
+        self.image_ext_list = [".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff", ".bmp", ".dib"]
         # リストと規定値。
         self.reset_settings()
         # レジストリから設定を読み込む。
@@ -758,7 +758,7 @@ class UISample(ttk.Frame):
             return False
 
 # 主処理。
-root.title('ガゾーナラベ version 0.7 by 片山博文MZ')
+root.title('ガゾーナラベ version 0.8 by 片山博文MZ')
 root.geometry("620x460")
 root.resizable(width=False, height=False)
 frame = UISample(root)
