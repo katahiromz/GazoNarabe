@@ -169,10 +169,7 @@ class UISample(ttk.Frame):
     # ドラッグ＆ドロップされた。
     def dnd_notify(self, filenames):
         for filename in filenames:
-            ext = os.path.splitext(filename)[1].lower()
-            if ext in self.image_ext_list:
-                self.listbox_01.insert(tk.END, filename)
-                #print(filename)
+            self.insert(filename)
     # ドラッグ＆ドロップを検査。
     def drop_check(self):
         global dropped
@@ -279,6 +276,9 @@ class UISample(ttk.Frame):
         self.label_15.place(x=20, y=245)
         self.label_16 = ttk.Label(self, text="並べる画像ファイルのリスト: (ファイルドロップが可能です)", width="200", state="normal", )
         self.label_16.place(x=20, y=280)
+        self.total_number = tk.StringVar()
+        self.label_17 = ttk.Label(self, text="　　　　　　", width="200", state="normal", textvariable=self.total_number)
+        self.label_17.place(x=400, y=280)
         self.group1 = tk.Frame(self)
         self.group1.place(x=20, y=300)
         self.listbox_01 = tk.Listbox(self.group1, width=92, height=7, selectmode=tk.EXTENDED, activestyle='none')
@@ -301,6 +301,15 @@ class UISample(ttk.Frame):
         self.button_05.place(x=520, y=420)
         self.button_06 = ttk.Button(self, command = self.commandResetSettings, text="設定の初期化", width="", state="normal", )
         self.button_06.place(x=510, y=270)
+    # 個数を更新。
+    def update_count(self):
+        self.total_number.set("全部で" + str(self.listbox_01.size()) + "個")
+    # 挿入。
+    def insert(self, filename):
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in self.image_ext_list:
+            self.listbox_01.insert(tk.END, filename)
+        self.update_count()
     # 「追加」ボタンを押した。
     def commandAddFiles(self):
         from tkinter import filedialog
@@ -308,14 +317,13 @@ class UISample(ttk.Frame):
             filetypes = (("画像ファイル", self.filter), ("すべてのファイル", "*.*")))
         filenames = root.tk.splitlist(names)
         for filename in filenames:
-            ext = os.path.splitext(filename)[1].lower()
-            if ext in self.image_ext_list:
-                self.listbox_01.insert(tk.END, filename)
+            self.insert(filename)
     # 「選択を削除」ボタンを押した。
     def commandDeleteItems(self):
         items = self.listbox_01.curselection()
         for item in reversed(list(items)):
             self.listbox_01.delete(item)
+        self.update_count();
     # 「↑」ボタンを押した。
     def commandMoveUp(self):
         items = list(self.listbox_01.curselection())
