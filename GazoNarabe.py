@@ -25,15 +25,13 @@ from ctypes.wintypes import HWND, UINT, WPARAM, LPARAM, DWORD
 WM_DROPFILES = 0x0233
 GWL_WNDPROC = -4
 DragAcceptFiles = ctypes.windll.shell32.DragAcceptFiles
-DragQueryFileA = ctypes.windll.shell32.DragQueryFileA
-DragQueryFileA.argtypes = [ ctypes.c_void_p, UINT, ctypes.c_void_p, UINT ]
+DragQueryFileW = ctypes.windll.shell32.DragQueryFileW
 DragFinish = ctypes.windll.shell32.DragFinish
 DragFinish.argtypes = [ ctypes.c_void_p ]
 CallWindowProcW = ctypes.windll.user32.CallWindowProcW
 CallWindowProcW.argtypes = [ ctypes.c_void_p, HWND, UINT, WPARAM, LPARAM ]
 SetWindowLongW = ctypes.windll.user32.SetWindowLongW
-GetModuleFileNameA = ctypes.windll.kernel32.GetModuleFileNameA
-GetModuleFileNameA.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, DWORD ]
+GetModuleFileNameW = ctypes.windll.kernel32.GetModuleFileNameW
 
 # window procedure
 org_proc = None
@@ -42,11 +40,11 @@ dropped = []
 @WINFUNCTYPE(c_long, HWND, UINT, WPARAM, LPARAM)
 def win_proc(hwnd, msg, wp, lp):
     if msg == WM_DROPFILES:
-        nf = DragQueryFileA(wp, -1, None, 0)
+        nf = DragQueryFileW(wp, -1, None, 0)
         for i in range(nf):
-            buf = ctypes.c_buffer(260)
-            if DragQueryFileA(wp, i, buf, ctypes.sizeof(buf)):
-                path = buf.value.decode("mbcs", errors='ignore')
+            buf = ctypes.create_unicode_buffer(260)
+            if DragQueryFileW(wp, i, buf, 260):
+                path = buf.value
                 if os.path.isfile(path) and not os.path.isdir(path):
                     dropped.append(path)
         DragFinish(wp)
@@ -376,9 +374,9 @@ class UISample(ttk.Frame):
         file_list = self.get_file_list()
 
         # 実行モジュールのパスを取得。
-        buf = ctypes.c_buffer(260)
-        GetModuleFileNameA(None, buf, ctypes.sizeof(buf))
-        mod_path = buf.value.decode("mbcs", errors='ignore')
+        buf = ctypes.create_unicode_buffer(260)
+        GetModuleFileNameW(None, buf, 260)
+        mod_path = buf.value
 
         # 最初の段落を取得する。
         dir = os.path.dirname(os.getcwd() + "/" + __file__)
