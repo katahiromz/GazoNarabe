@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # ガゾーナラベ by 片山博文MZ
 
-# sys, os
-import sys, os
+# sys, os, datetime
+import sys, os, datetime
 import winreg as reg
 
 class GazoNarabeError(Exception):
@@ -363,7 +363,7 @@ class UISample(ttk.Frame):
         return file_list
     # docxファイルを生成する。
     def generate_docx(self):
-        import docx, os, datetime
+        import docx
         from docx.table import Table
         from docx.enum.section import WD_ORIENT
         from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
@@ -382,15 +382,15 @@ class UISample(ttk.Frame):
 
         # 最初の段落を取得する。
         dir = os.path.dirname(os.getcwd() + "/" + __file__)
-        file = dir + "/template.docx"
+        file = dir + "/../template.docx"
         if not os.path.isfile(file):
             dir = os.path.dirname(mod_path)
-            file = dir + "/template.docx"
+            file = dir + "/../template.docx"
         try:
             document = docx.Document(file)
         except:
             messagebox.showerror("ERROR",
-                "生成に必要なファイル「template.docx」がGazoNarabe.exeと同じフォルダに見つかりません。")
+                "生成に必要なファイル「template.docx」が見つかりません。")
             return False
 
         para = document.paragraphs[0]
@@ -497,8 +497,16 @@ class UISample(ttk.Frame):
             filename = file_list[image_index]
             # 日時文字列の処理。
             if self.datetime_type_default == "画像作成日時":
-                timestamp = os.path.getctime(filename)
-                the_time = datetime.datetime.fromtimestamp(timestamp)
+                try:
+                    from PIL import Image
+                    s = Image.open(filename)._getexif()[36867]
+                    s = s.replace(":", "-", 2)
+                    the_time = datetime.datetime.fromisoformat(s)
+                    #print("EXIF: " + filename + " | " + str(the_time))
+                except:
+                    timestamp = os.path.getctime(filename)
+                    the_time = datetime.datetime.fromtimestamp(timestamp)
+                    #print("non-EXIF: " + filename + " | " + str(the_time))
             elif self.datetime_type_default == "画像更新日時":
                 timestamp = os.path.getmtime(filename)
                 the_time = datetime.datetime.fromtimestamp(timestamp)
@@ -750,7 +758,7 @@ class UISample(ttk.Frame):
             return False
 
 # 主処理。
-root.title('ガゾーナラベ version 0.6 by 片山博文MZ')
+root.title('ガゾーナラベ version 0.7 by 片山博文MZ')
 root.geometry("620x460")
 root.resizable(width=False, height=False)
 frame = UISample(root)

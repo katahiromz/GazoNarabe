@@ -3,3 +3,10 @@ build
 dist
 *.spec
 GazoNarabe-*-installer.exe
+GazoNarabeStarter.exe
+*.o
+*.cmake
+CMakeCache.txt
+CMakeFiles
+Makefile
+a.*
