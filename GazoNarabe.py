@@ -109,6 +109,8 @@ def try_int(value, field, another_value = "\x7F"):
         messagebox.showerror("ERROR", "「" + field + "」の欄が間違っています。")
         raise
 
+current_filename = ""
+
 class UISample(ttk.Frame):
     def reset_settings(self):
         self.muki_list = [NOSPEC, "縦向き", "横向き"]
@@ -141,7 +143,8 @@ class UISample(ttk.Frame):
         self.datetime_type_default = "画像作成日時"
     def __init__(self, root):
         super().__init__(root, width='620', height='460')
-        self.image_ext_list = [".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff", ".bmp", ".dib"]
+        self.image_ext_list = [".jpg", ".jpeg", ".jpe", ".jfif", ".png", ".gif", ".tif", ".tiff",
+                               ".bmp", ".dib"]
         # リストと規定値。
         self.reset_settings()
         # レジストリから設定を読み込む。
@@ -617,6 +620,8 @@ class UISample(ttk.Frame):
                         requested_height = requested_width * aspect1
                     requested_width *= 0.98
                     requested_height *= 0.98
+            global current_filename
+            current_filename = filename
             if requested_width == NOSPEC and requested_height == NOSPEC:
                 run.add_picture(filename)
             elif requested_width != NOSPEC and requested_height == NOSPEC:
@@ -713,8 +718,13 @@ class UISample(ttk.Frame):
         try:
             self.generate_docx()
         except Exception as err:
-            messagebox.showerror("ERROR: ガゾーナラベ", str(err))
-
+            global current_filename
+            if str(err) != "":
+                messagebox.showerror("ERROR: ガゾーナラベ", str(err))
+            elif current_filename != "":
+                messagebox.showerror("ERROR: ガゾーナラベ", "ファイル「" + current_filename + "」の処理に失敗しました。")
+            else:
+                messagebox.showerror("ERROR: ガゾーナラベ", "何らかの処理に失敗しました。")
         # 設定を保存する。
         self.save_settings()
     # 「終了」ボタンを押した。
