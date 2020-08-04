@@ -189,6 +189,8 @@ class UISample(ttk.Frame):
         selection = self.listbox_01.curselection()
         if len(selection) <= 0:
             self.button_03.config(state="disabled")
+            self.label_18.image = None
+            self.label_18["image"] = None
             return
         self.button_03.config(state="normal")
         filename = self.listbox_01.get(selection[0])
@@ -324,9 +326,11 @@ class UISample(ttk.Frame):
         if self.listbox_01.size() <= 0:
             self.button_03.config(state="disabled")
             self.total_number.set("")
+            self.listbox_on_sel_change(0)
             return
         self.total_number.set("全部で" + str(self.listbox_01.size()) + "個")
         self.button_03.config(state="normal")
+        self.listbox_on_sel_change(0)
     # 挿入。
     def insert(self, filename):
         ext = os.path.splitext(filename)[1].lower()
