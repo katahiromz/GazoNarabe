@@ -725,6 +725,7 @@ class UISample(ttk.Frame):
                 messagebox.showerror("ERROR: ガゾーナラベ", "ファイル「" + current_filename + "」の処理に失敗しました。")
             else:
                 messagebox.showerror("ERROR: ガゾーナラベ", "何らかの処理に失敗しました。")
+            return
         # 設定を保存する。
         self.save_settings()
     # 「終了」ボタンを押した。
