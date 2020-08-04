@@ -184,6 +184,20 @@ class UISample(ttk.Frame):
         global org_proc
         org_proc = SetWindowLongW(self.hwnd, GWL_WNDPROC, win_proc)
         self.after_idle(self.drop_check)
+    # リストボックスの選択が変わった。
+    def listbox_on_sel_change(self, evt):
+        selection = self.listbox_01.curselection()
+        if len(selection) <= 0:
+            self.button_03.config(state="disabled")
+            return
+        self.button_03.config(state="normal")
+        filename = self.listbox_01.get(selection[0])
+        from PIL import Image, ImageTk
+        img = Image.open(filename)
+        img = img.resize((48, 48))
+        img = ImageTk.PhotoImage(img);
+        self.label_18.image = img
+        self.label_18["image"] = img
     # ウィジェットをすべて作成。
     def createWidgets(self):
         self.label_01 = ttk.Label(self, text="用紙の向き:", width="", state="normal", )
@@ -278,7 +292,9 @@ class UISample(ttk.Frame):
         self.label_16.place(x=20, y=280)
         self.total_number = tk.StringVar()
         self.label_17 = ttk.Label(self, text="　　　　　　", width="200", state="normal", textvariable=self.total_number)
-        self.label_17.place(x=400, y=280)
+        self.label_17.place(x=320, y=280)
+        self.label_18 = ttk.Label(self, width="32", state="normal", image="")
+        self.label_18.place(x=400, y=245)
         self.group1 = tk.Frame(self)
         self.group1.place(x=20, y=300)
         self.listbox_01 = tk.Listbox(self.group1, width=92, height=7, selectmode=tk.EXTENDED, activestyle='none')
@@ -287,6 +303,7 @@ class UISample(ttk.Frame):
         self.vscrollbar = tk.Scrollbar(self.group1, orient=tk.VERTICAL, command=self.listbox_01.yview)
         self.vscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.listbox_01.config(yscrollcommand = self.vscrollbar.set)
+        self.listbox_01.bind('<<ListboxSelect>>', self.listbox_on_sel_change)
         self.button_01 = ttk.Button(self, command = self.commandAddFiles, text="リストに追加...", width="15", state="normal", )
         self.button_01.place(x=20, y=420)
         self.button_02 = ttk.Button(self, command = self.commandMoveUp, text="↑", width="8", state="normal", )
@@ -301,9 +318,15 @@ class UISample(ttk.Frame):
         self.button_05.place(x=520, y=420)
         self.button_06 = ttk.Button(self, command = self.commandResetSettings, text="設定の初期化", width="", state="normal", )
         self.button_06.place(x=510, y=270)
+        self.update_count()
     # 個数を更新。
     def update_count(self):
+        if self.listbox_01.size() <= 0:
+            self.button_03.config(state="disabled")
+            self.total_number.set("")
+            return
         self.total_number.set("全部で" + str(self.listbox_01.size()) + "個")
+        self.button_03.config(state="normal")
     # 挿入。
     def insert(self, filename):
         ext = os.path.splitext(filename)[1].lower()
