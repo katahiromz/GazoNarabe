@@ -185,7 +185,7 @@ class UISample(ttk.Frame):
         org_proc = SetWindowLongW(self.hwnd, GWL_WNDPROC, win_proc)
         self.after_idle(self.drop_check)
     # リストボックスの選択が変わった。
-    def listbox_on_sel_change(self, evt):
+    def listbox_on_sel_change(self, evt=None):
         selection = self.listbox_01.curselection()
         if len(selection) <= 0:
             self.button_03.config(state="disabled")
@@ -326,11 +326,11 @@ class UISample(ttk.Frame):
         if self.listbox_01.size() <= 0:
             self.button_03.config(state="disabled")
             self.total_number.set("")
-            self.listbox_on_sel_change(0)
+            self.listbox_on_sel_change()
             return
         self.total_number.set("全部で" + str(self.listbox_01.size()) + "個")
         self.button_03.config(state="normal")
-        self.listbox_on_sel_change(0)
+        self.listbox_on_sel_change()
     # 挿入。
     def insert(self, filename):
         ext = os.path.splitext(filename)[1].lower()
@@ -415,8 +415,11 @@ class UISample(ttk.Frame):
 
         # 最初の段落を取得する。
         dir = os.path.dirname(os.getcwd() + "/" + __file__)
-        file = dir + "/../template.docx"
+        file = dir + "/template.docx"
         if not os.path.isfile(file):
+            dir = os.path.dirname(os.getcwd() + "/" + __file__)
+            file = dir + "/../template.docx"
+        elif not os.path.isfile(file):
             dir = os.path.dirname(mod_path)
             file = dir + "/../template.docx"
         try:
