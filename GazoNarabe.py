@@ -111,7 +111,7 @@ def try_int(value, field, another_value = "\x7F"):
 
 current_filename = ""
 
-class UISample(ttk.Frame):
+class GazoNarabeApplication(ttk.Frame):
     def reset_settings(self):
         self.muki_list = [NOSPEC, "縦向き", "横向き"]
         self.muki_default = NOSPEC
@@ -152,7 +152,7 @@ class UISample(ttk.Frame):
         # フィルターを作成。
         self.filter = "*" + ";*".join(self.image_ext_list)
         # ウィジェットをすべて作成。
-        self.createWidgets()
+        self.create_widgets()
         self.pack()
         # アイコン設定。
         try:
@@ -213,14 +213,15 @@ class UISample(ttk.Frame):
             return
         self.button_03.config(state="normal")
         filename = self.listbox_01.get(selection[0])
+        picture_filename = self.process_image(filename)
         from PIL import Image, ImageTk
-        img = Image.open(filename)
+        img = Image.open(picture_filename)
         img = img.resize((48, 48))
         img = ImageTk.PhotoImage(img);
         self.label_18.image = img
         self.label_18["image"] = img
     # ウィジェットをすべて作成。
-    def createWidgets(self):
+    def create_widgets(self):
         self.label_01 = ttk.Label(self, text="用紙の向き:", width="", state="normal", )
         self.label_01.place(x=20, y=20)
         self.muki = tk.StringVar()
@@ -413,6 +414,43 @@ class UISample(ttk.Frame):
             text = self.listbox_01.get(i)
             file_list.append(text)
         return file_list
+    # 画像ファイルを処理する。処理後のファイル名を返す。
+    def process_image(self, filename):
+        picture_filename = filename
+        from PIL import Image, ExifTags
+        try:
+            image = Image.open(filename)
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == 'Orientation':
+                    break
+            exif = dict(image._getexif().items())
+            # 必要なら回転して保存する。
+            import tempfile
+            if exif[orientation] == 3:
+                image = image.rotate(180, expand=True)
+                ext = os.path.splitext(filename)[1].lower()
+                handle, picture_filename = tempfile.mkstemp()
+                os.close(handle)
+                picture_filename += ext
+                image.save(picture_filename)
+            elif exif[orientation] == 6:
+                image = image.rotate(270, expand=True)
+                ext = os.path.splitext(filename)[1].lower()
+                handle, picture_filename = tempfile.mkstemp()
+                os.close(handle)
+                picture_filename += ext
+                image.save(picture_filename)
+            elif exif[orientation] == 8:
+                image = image.rotate(90, expand=True)
+                ext = os.path.splitext(filename)[1].lower()
+                handle, picture_filename = tempfile.mkstemp()
+                os.close(handle)
+                picture_filename += ext
+                image.save(picture_filename)
+            image.close()
+            return picture_filename
+        except:
+            return filename
     # docxファイルを生成する。
     def generate_docx(self):
         import docx
@@ -611,55 +649,19 @@ class UISample(ttk.Frame):
             # セルの最初の段落を左右中央揃えにする。
             para = cell.paragraphs[0]
             para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            # 画像を貼り付ける。
+            # 段落に欄を追加。
             run = para.add_run()
-            # 画像サイズを得る。
+            # 画像を処理する。
             requested_width = self.image_width_default
             requested_height = self.image_height_default
-            real_image_width = real_image_height = 0
-            from PIL import Image
-            with Image.open(filename) as image:
-                real_image_width = image.width
-                real_image_height = image.height
-            # 画像を処理する。
             global current_filename
             current_filename = filename
-            picture_filename = filename
-            from PIL import Image, ExifTags
-            try:
-                image = Image.open(filename)
-                for orientation in ExifTags.TAGS.keys():
-                    if ExifTags.TAGS[orientation] == 'Orientation':
-                        break
-                exif = dict(image._getexif().items())
-                # 必要なら回転して保存する。
-                import tempfile
-                if exif[orientation] == 3:
-                    image = image.rotate(180, expand=True)
-                    ext = os.path.splitext(filename)[1].lower()
-                    handle, picture_filename = tempfile.mkstemp()
-                    os.close(handle)
-                    picture_filename += ext
-                    image.save(picture_filename)
-                elif exif[orientation] == 6:
-                    image = image.rotate(270, expand=True)
-                    ext = os.path.splitext(filename)[1].lower()
-                    handle, picture_filename = tempfile.mkstemp()
-                    os.close(handle)
-                    picture_filename += ext
-                    image.save(picture_filename)
-                    real_image_width, real_image_height = real_image_height, real_image_width
-                elif exif[orientation] == 8:
-                    image = image.rotate(90, expand=True)
-                    ext = os.path.splitext(filename)[1].lower()
-                    handle, picture_filename = tempfile.mkstemp()
-                    os.close(handle)
-                    picture_filename += ext
-                    image.save(picture_filename)
-                    real_image_width, real_image_height = real_image_height, real_image_width
-                image.close()
-            except:
-                pass
+            picture_filename = self.process_image(filename)
+            real_image_width = real_image_height = 0
+            from PIL import Image
+            with Image.open(picture_filename) as image:
+                real_image_width = image.width
+                real_image_height = image.height
             # 画像のサイズに応じて要求サイズを変更。
             if real_image_width * real_image_height != 0:
                 if requested_width == "max" or requested_height == "max":
@@ -863,7 +865,7 @@ class UISample(ttk.Frame):
 root.title('ガゾーナラベ version 0.9 by 片山博文MZ')
 root.geometry("620x460")
 root.resizable(width=False, height=False)
-frame = UISample(root)
+frame = GazoNarabeApplication(root)
 root.mainloop()
 
 with reg.CreateKeyEx(reg.HKEY_CURRENT_USER, COMPANY_KEY, 0, reg.KEY_WRITE|reg.KEY_WOW64_64KEY) as company_key:
