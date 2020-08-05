@@ -498,7 +498,7 @@ class UISample(ttk.Frame):
         # 表の印刷可能領域(mm)。
         table_width = the_page_width - x_margin
         table_height = the_page_height - y_margin
-        table_height -= the_font_size # ページの最後に１行残す。
+        table_height -= the_font_size * 1.5
         if self.page_title_default != NOSPEC:
             table_height -= the_font_size
 
