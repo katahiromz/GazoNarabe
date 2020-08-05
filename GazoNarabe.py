@@ -807,7 +807,6 @@ class GazoNarabeApplication(ttk.Frame):
         self.datetime_type.set(self.datetime_type_default)
         self.output_name.set(self.output_name_default)
         messagebox.showinfo("ガゾーナラベ", "設定を初期化しました。")
-        root.destroy()
     # １つ設定を読み込む。
     def read_settings(self, key, name, the_list, value):
         try:
