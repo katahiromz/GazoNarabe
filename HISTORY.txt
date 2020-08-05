@@ -13,3 +13,4 @@
     - EXIF情報のOrientationを認識させる。
     - 寸法を修正。
     - template.docxの余白に余裕を持たせる。
+    - メインアイコンを設定。

@@ -45,6 +45,7 @@ Source: "HISTORY.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "template.docx"; DestDir: "{app}"; Flags: ignoreversion
 Source: "GazoNarabeStarter.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "vcruntime140.dll"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "GN.ico"; DestDir: "{app}\data"; Flags: ignoreversion
 Source: "dist\GazoNarabe\api-ms-win-core-console-l1-1-0.dll"; DestDir: "{app}\data"; Flags: ignoreversion
 Source: "dist\GazoNarabe\api-ms-win-core-datetime-l1-1-0.dll"; DestDir: "{app}\data"; Flags: ignoreversion
 Source: "dist\GazoNarabe\api-ms-win-core-debug-l1-1-0.dll"; DestDir: "{app}\data"; Flags: ignoreversion

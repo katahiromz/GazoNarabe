@@ -154,6 +154,22 @@ class UISample(ttk.Frame):
         # ウィジェットをすべて作成。
         self.createWidgets()
         self.pack()
+        # アイコン設定。
+        try:
+            dir = os.path.dirname(os.getcwd() + "/" + __file__)
+            file = dir + "\\GN.ico"
+            if not os.path.isfile(file):
+                dir = os.path.dirname(os.getcwd() + "/" + __file__)
+                file = dir + "\\data\\GN.ico"
+            if not os.path.isfile(file):
+                buf = ctypes.create_unicode_buffer(260)
+                GetModuleFileNameW(None, buf, 260)
+                dir = os.path.dirname(buf.value)
+                file = dir + "\\data\\GN.ico"
+            if os.path.isfile(file):
+                root.iconbitmap(file)
+        except:
+            pass
         # ウィンドウハンドルを取得。
         self.hwnd = self.winfo_id()
         # ドラッグ＆ドロップの準備。
@@ -411,19 +427,16 @@ class UISample(ttk.Frame):
         # リストボックスからファイルのリストを取得する。
         file_list = self.get_file_list()
 
-        # 実行モジュールのパスを取得。
-        buf = ctypes.create_unicode_buffer(260)
-        GetModuleFileNameW(None, buf, 260)
-        mod_path = buf.value
-
         # 最初の段落を取得する。
         dir = os.path.dirname(os.getcwd() + "/" + __file__)
         file = dir + "/template.docx"
         if not os.path.isfile(file):
             dir = os.path.dirname(os.getcwd() + "/" + __file__)
             file = dir + "/../template.docx"
-        elif not os.path.isfile(file):
-            dir = os.path.dirname(mod_path)
+        if not os.path.isfile(file):
+            buf = ctypes.create_unicode_buffer(260)
+            GetModuleFileNameW(None, buf, 260)
+            dir = os.path.dirname(buf.value)
             file = dir + "/../template.docx"
         try:
             document = docx.Document(file)
