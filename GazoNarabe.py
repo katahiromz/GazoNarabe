@@ -353,9 +353,11 @@ class GazoNarabeApplication(ttk.Frame):
         self.listbox_on_sel_change()
     # 挿入。
     def insert(self, filename):
+        self.listbox_01.selection_clear(0, tk.END)
         ext = os.path.splitext(filename)[1].lower()
         if ext in self.image_ext_list:
             self.listbox_01.insert(tk.END, filename)
+            self.listbox_01.selection_set(self.listbox_01.size() - 1)
         self.update_count()
     # 「追加」ボタンを押した。
     def commandAddFiles(self):
