@@ -608,6 +608,46 @@ class UISample(ttk.Frame):
             with Image.open(filename) as image:
                 real_image_width = image.width
                 real_image_height = image.height
+            # 画像を処理する。
+            global current_filename
+            current_filename = filename
+            picture_filename = filename
+            from PIL import Image, ExifTags
+            try:
+                image = Image.open(filename)
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation] == 'Orientation':
+                        break
+                exif = dict(image._getexif().items())
+                # 必要なら回転して保存する。
+                import tempfile
+                if exif[orientation] == 3:
+                    image = image.rotate(180, expand=True)
+                    ext = os.path.splitext(filename)[1].lower()
+                    handle, picture_filename = tempfile.mkstemp()
+                    os.close(handle)
+                    picture_filename += ext
+                    image.save(picture_filename)
+                elif exif[orientation] == 6:
+                    image = image.rotate(270, expand=True)
+                    ext = os.path.splitext(filename)[1].lower()
+                    handle, picture_filename = tempfile.mkstemp()
+                    os.close(handle)
+                    picture_filename += ext
+                    image.save(picture_filename)
+                    real_image_width, real_image_height = real_image_height, real_image_width
+                elif exif[orientation] == 8:
+                    image = image.rotate(90, expand=True)
+                    ext = os.path.splitext(filename)[1].lower()
+                    handle, picture_filename = tempfile.mkstemp()
+                    os.close(handle)
+                    picture_filename += ext
+                    image.save(picture_filename)
+                    real_image_width, real_image_height = real_image_height, real_image_width
+                image.close()
+            except:
+                pass
+            # 画像のサイズに応じて要求サイズを変更。
             if real_image_width * real_image_height != 0:
                 if requested_width == "max" or requested_height == "max":
                     aspect0 = float(contents_height) / float(contents_width)
@@ -620,18 +660,20 @@ class UISample(ttk.Frame):
                         requested_height = requested_width * aspect1
                     requested_width *= 0.98
                     requested_height *= 0.98
-            global current_filename
-            current_filename = filename
+            # 画像を貼り付ける。
             if requested_width == NOSPEC and requested_height == NOSPEC:
-                run.add_picture(filename)
+                run.add_picture(picture_filename)
             elif requested_width != NOSPEC and requested_height == NOSPEC:
-                run.add_picture(filename, width = Mm(int(requested_width)))
+                run.add_picture(picture_filename, width = Mm(int(requested_width)))
             elif requested_width == NOSPEC and requested_height != NOSPEC:
-                run.add_picture(filename, height = Mm(int(requested_height)))
+                run.add_picture(picture_filename, height = Mm(int(requested_height)))
             elif requested_width != NOSPEC and requested_height != NOSPEC:
-                run.add_picture(filename, width = Mm(int(requested_width)), height = Mm(int(requested_height)))
+                run.add_picture(picture_filename, width = Mm(int(requested_width)), height = Mm(int(requested_height)))
             else:
                 raise
+            # 必要なら一時ファイルを削除。
+            if filename != picture_filename:
+                os.remove(picture_filename)
             # 画像のタイトルを取得する。
             image_title = self.image_title_default
             if image_title != NOSPEC:
@@ -805,7 +847,7 @@ class UISample(ttk.Frame):
             return False
 
 # 主処理。
-root.title('ガゾーナラベ version 0.8 by 片山博文MZ')
+root.title('ガゾーナラベ version 0.9 by 片山博文MZ')
 root.geometry("620x460")
 root.resizable(width=False, height=False)
 frame = UISample(root)
