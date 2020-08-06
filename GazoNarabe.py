@@ -220,6 +220,8 @@ class GazoNarabeApplication(ttk.Frame):
         img = ImageTk.PhotoImage(img);
         self.label_18.image = img
         self.label_18["image"] = img
+        if filename != picture_filename:
+            os.remove(picture_filename)
     # ウィジェットをすべて作成。
     def create_widgets(self):
         self.label_01 = ttk.Label(self, text="用紙の向き:", width="", state="normal", )
