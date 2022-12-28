@@ -139,8 +139,8 @@ class GazoNarabeApplication(ttk.Frame):
         self.font_size_default = NOSPEC
         self.output_name_list = ["写真一覧-%Y.%m.%d", "私のアルバム-%Y.%m.%d", "実験結果-%Y.%m.%d"]
         self.output_name_default = "写真一覧-%Y.%m.%d"
-        self.datetime_type_list = ["画像作成日時", "画像更新日時", "docx生成日時"]
-        self.datetime_type_default = "画像作成日時"
+        self.datetime_type_list = ["撮影日時", "画像作成日時", "画像更新日時", "docx生成日時"]
+        self.datetime_type_default = "撮影日時"
     def __init__(self, root):
         super().__init__(root, width='620', height='460')
         self.image_ext_list = [".jpg", ".jpeg", ".jpe", ".jfif", ".png", ".gif", ".tif", ".tiff",
@@ -296,7 +296,7 @@ class GazoNarabeApplication(ttk.Frame):
         self.combobox_12 = ttk.Combobox(self, height="10", state="normal", width="25", values=self.font_size_list, textvariable=self.font_size)
         self.combobox_12.place(x=420, y=140)
         self.combobox_12.set(self.font_size_default)
-        self.label_17 = ttk.Label(self, text="日付の種類:", width="", state="normal", )
+        self.label_17 = ttk.Label(self, text="日時の種類:", width="", state="normal", )
         self.label_17.place(x=320, y=170)
         self.datetime_type = tk.StringVar()
         self.combobox_14 = ttk.Combobox(self, height="10", state="readonly", width="25", values=self.datetime_type_list, textvariable=self.datetime_type)
@@ -420,41 +420,37 @@ class GazoNarabeApplication(ttk.Frame):
         return file_list
     # 画像ファイルを処理する。処理後のファイル名を返す。
     def process_image(self, filename):
-        picture_filename = filename
         from PIL import Image, ExifTags
+        image = Image.open(filename)
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == 'Orientation':
+                break
+        exif = None
         try:
-            image = Image.open(filename)
-            for orientation in ExifTags.TAGS.keys():
-                if ExifTags.TAGS[orientation] == 'Orientation':
-                    break
             exif = dict(image._getexif().items())
-            # 必要なら回転して保存する。
-            import tempfile
+        except:
+            pass
+        # 必要なら回転する。
+        if exif:
             if exif[orientation] == 3:
                 image = image.rotate(180, expand=True)
-                ext = os.path.splitext(filename)[1].lower()
-                handle, picture_filename = tempfile.mkstemp()
-                os.close(handle)
-                picture_filename += ext
-                image.save(picture_filename)
             elif exif[orientation] == 6:
                 image = image.rotate(270, expand=True)
-                ext = os.path.splitext(filename)[1].lower()
-                handle, picture_filename = tempfile.mkstemp()
-                os.close(handle)
-                picture_filename += ext
-                image.save(picture_filename)
             elif exif[orientation] == 8:
                 image = image.rotate(90, expand=True)
-                ext = os.path.splitext(filename)[1].lower()
-                handle, picture_filename = tempfile.mkstemp()
-                os.close(handle)
-                picture_filename += ext
-                image.save(picture_filename)
-            image.close()
-            return picture_filename
-        except:
-            return filename
+        # 一時ファイルに保存する。
+        import tempfile
+        ext = os.path.splitext(filename)[1].lower()
+        handle, picture_filename = tempfile.mkstemp()
+        os.close(handle)
+        picture_filename += ext
+        image.save(picture_filename)
+        # ファイルサイズが1MB以上なら縮小する。
+        while os.path.getsize(picture_filename) > 1024 * 1024:
+            image = Image.open(picture_filename)
+            new_image = image.resize((image.width // 2, image.height // 2))
+            new_image.save(picture_filename)
+        return picture_filename
     # docxファイルを生成する。
     def generate_docx(self):
         import docx
@@ -590,7 +586,7 @@ class GazoNarabeApplication(ttk.Frame):
         for i in range(0, len(file_list)):
             filename = file_list[image_index]
             # 日時文字列の処理。
-            if self.datetime_type_default == "画像作成日時":
+            if self.datetime_type_default == "撮影日時":
                 try:
                     from PIL import Image
                     s = Image.open(filename)._getexif()[36867]
@@ -601,6 +597,9 @@ class GazoNarabeApplication(ttk.Frame):
                     timestamp = os.path.getctime(filename)
                     the_time = datetime.datetime.fromtimestamp(timestamp)
                     #print("non-EXIF: " + filename + " | " + str(the_time))
+            elif self.datetime_type_default == "画像作成日時":
+                timestamp = os.path.getctime(filename)
+                the_time = datetime.datetime.fromtimestamp(timestamp)
             elif self.datetime_type_default == "画像更新日時":
                 timestamp = os.path.getmtime(filename)
                 the_time = datetime.datetime.fromtimestamp(timestamp)
@@ -879,7 +878,7 @@ class GazoNarabeApplication(ttk.Frame):
             return False
 
 # 主処理。
-root.title('ガゾーナラベ version 0.9 by 片山博文MZ')
+root.title('ガゾーナラベ version 0.9.1 by 片山博文MZ')
 root.geometry("620x460")
 root.resizable(width=False, height=False)
 frame = GazoNarabeApplication(root)
